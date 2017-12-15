@@ -114,3 +114,12 @@ backend_config:
       - fenced_code_blocks
       - strikeout
 ```
+
+
+## Troubleshooting
+
+### Could not convert image ...: check that rsvg2pdf is in path
+
+In order to use svg images in pdf, you need to have `rsvg-convert` executable in `PATH`.
+
+On macOS, `brew install librsvg` does the trick. On Ubuntu, `apt install librsvg2-bin`. On Windows, [download `rsvg-convert.7z`](http://opensourcepack.blogspot.ru/2012/06/rsvg-convert-svg-image-conversion-tool.html) (without fontconfig support), unpack `rsvg-convert.exe`, and put it anywhere in `PATH`. For example, you can put it in the same directory where you run `foliant make`.
