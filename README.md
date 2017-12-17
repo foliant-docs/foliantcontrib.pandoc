@@ -2,7 +2,7 @@
 
 [Pandoc](http://pandoc.org/) is a Swiss-army knife document converter. It converts almost any format to any other format: md to pdf, rst to html, adoc to docx, and so on and so on.
 
-Pandoc backend for Foliant add `pdf` and `docx` targets.
+Pandoc backend for Foliant add `pdf`, `docx`, and `tex` targets.
 
 
 ## Installation
@@ -37,6 +37,17 @@ $ foliant make docx -p my-project
 Result: My_Project-2017-12-04.docx
 ```
 
+Build tex (mostly for pdf debugging):
+
+```shell
+$ foliant make tex -p my-project
+✔ Parsing config
+✔ Applying preprocessor flatten
+✔ Making docx with Pandoc
+─────────────────────
+Result: My_Project-2017-12-04.tex
+```
+
 
 ## Config
 
@@ -65,7 +76,7 @@ backend_config:
 :   is the path to `pandoc` executable. By default, it's assumed to be in the `PATH`.
 
 `template`
-:   is the path to the TeX template to use when building pdf (see [“Templates”](http://pandoc.org/MANUAL.html#templates) in the Pandoc documentation).
+:   is the path to the TeX template to use when building pdf and tex (see [“Templates”](http://pandoc.org/MANUAL.html#templates) in the Pandoc documentation).
 
     > **Tip**
     >
