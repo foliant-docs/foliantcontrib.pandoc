@@ -9,7 +9,7 @@ from foliant.preprocessors import flatten
 class Backend(BaseBackend):
     _flat_src_file_name = '__all__.md'
 
-    targets = ('pdf', 'docx')
+    targets = ('pdf', 'docx', 'tex')
 
     required_preprocessors_before = {
         'flatten': {
@@ -92,6 +92,23 @@ class Backend(BaseBackend):
 
         return ' '.join(components)
 
+    def _get_tex_command(self) -> str:
+        components = [self._pandoc_config.get('binary_path', 'pandoc')]
+
+        template = self._pandoc_config.get('template')
+        if template:
+            components.append(f'--template={template}')
+
+        components.append(f'--output {self.get_slug()}.tex')
+        components.append(self._get_vars_string())
+        components.append(self._get_filters_string())
+        components.append(self._get_params_string())
+        components.append(
+            f'-f {self._get_from_string()} {self._flat_src_file_path}'
+        )
+
+        return ' '.join(components)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -105,6 +122,8 @@ class Backend(BaseBackend):
                     command = self._get_pdf_command()
                 elif target == 'docx':
                     command = self._get_docx_command()
+                elif target == 'tex':
+                    command = self._get_tex_command()
                 else:
                     raise ValueError(f'Pandoc cannot make {target}')
 
