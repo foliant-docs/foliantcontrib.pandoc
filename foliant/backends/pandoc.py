@@ -60,7 +60,7 @@ class Backend(BaseBackend):
         return '+'.join((markdown_flavor, *markdown_extensions))
 
     def _get_pdf_command(self) -> str:
-        components = [self._pandoc_config.get('binary_path', 'pandoc')]
+        components = [self._pandoc_config.get('pandoc_path', 'pandoc')]
 
         template = self._pandoc_config.get('template')
         if template:
@@ -77,7 +77,7 @@ class Backend(BaseBackend):
         return ' '.join(components)
 
     def _get_docx_command(self) -> str:
-        components = [self._pandoc_config.get('binary_path', 'pandoc')]
+        components = [self._pandoc_config.get('pandoc_path', 'pandoc')]
 
         reference_docx = self._pandoc_config.get('reference_docx')
         if reference_docx:
@@ -93,7 +93,7 @@ class Backend(BaseBackend):
         return ' '.join(components)
 
     def _get_tex_command(self) -> str:
-        components = [self._pandoc_config.get('binary_path', 'pandoc')]
+        components = [self._pandoc_config.get('pandoc_path', 'pandoc')]
 
         template = self._pandoc_config.get('template')
         if template:

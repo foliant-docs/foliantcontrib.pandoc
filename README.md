@@ -58,7 +58,7 @@ You can however customize the backend with options in `backend_config.pandoc` se
 ```yaml
 backend_config:
   pandoc:
-    binary_path: pandoc
+    pandoc_path: pandoc
     template: !path template.tex
     vars:
       ...
@@ -72,7 +72,7 @@ backend_config:
       ...
 ```
 
-`binary_path`
+`pandoc_path`
 :   is the path to `pandoc` executable. By default, it's assumed to be in the `PATH`.
 
 `template`
