@@ -54,7 +54,7 @@ class Backend(BaseBackend):
         return ' '.join(result)
 
     def _get_from_string(self) -> str:
-        markdown_flavor = self._pandoc_config.get('markdown_flavor', 'markdown_strict')
+        markdown_flavor = self._pandoc_config.get('markdown_flavor', 'markdown')
         markdown_extensions = self._pandoc_config.get('markdown_extensions', ())
 
         return '+'.join((markdown_flavor, *markdown_extensions))
