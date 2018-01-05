@@ -67,7 +67,7 @@ backend_config:
       ...
     filters:
       ...
-    markdown_flavor: markdown_strict
+    markdown_flavor: markdown
     markdown_extensions:
       ...
 ```
@@ -99,7 +99,7 @@ backend_config:
 :   is a list of Pandoc filters to be applied during build.
 
 `markdown_flavor`
-:   is the Markdown flavor assumed in the source. Default is `markdown_strict`, which is the original Markdown by John Gruber. See [“Markdown Variants”](http://pandoc.org/MANUAL.html#markdown-variants) in the Pandoc documentation.
+:   is the Markdown flavor assumed in the source. Default is `markdown`, [Pandoc's extended Markdown](http://pandoc.org/MANUAL.html#pandocs-markdown). See [“Markdown Variants”](http://pandoc.org/MANUAL.html#markdown-variants) in the Pandoc documentation.
 
 `markdown_extensions`
 :   is a list of Markdown extensions applied to the Markdown source. See [Pandoc’s Markdown](http://pandoc.org/MANUAL.html#pandocs-markdown) in the Pandoc documentation.
