@@ -19,9 +19,9 @@ Build pdf:
 
 ```shell
 $ foliant make pdf -p my-project
-✔ Parsing config
-✔ Applying preprocessor flatten
-✔ Making pdf with Pandoc
+v Parsing config
+v Applying preprocessor flatten
+v Making pdf with Pandoc
 ─────────────────────
 Result: My_Project-2017-12-04.pdf
 ```
@@ -30,9 +30,9 @@ Build docx:
 
 ```shell
 $ foliant make docx -p my-project
-✔ Parsing config
-✔ Applying preprocessor flatten
-✔ Making docx with Pandoc
+v Parsing config
+v Applying preprocessor flatten
+v Making docx with Pandoc
 ─────────────────────
 Result: My_Project-2017-12-04.docx
 ```
@@ -41,9 +41,9 @@ Build tex (mostly for pdf debugging):
 
 ```shell
 $ foliant make tex -p my-project
-✔ Parsing config
-✔ Applying preprocessor flatten
-✔ Making docx with Pandoc
+v Parsing config
+v Applying preprocessor flatten
+v Making docx with Pandoc
 ─────────────────────
 Result: My_Project-2017-12-04.tex
 ```
