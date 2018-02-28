@@ -15,7 +15,7 @@ setup(
     name='foliantcontrib.pandoc',
     description=SHORT_DESCRIPTION,
     long_description=LONG_DESCRIPTION,
-    version='1.0.2',
+    version='1.0.3',
     author='Konstantin Molchanov',
     author_email='moigagoo@live.com',
     url='https://github.com/foliant-docs/foliantcontrib.pandoc',
