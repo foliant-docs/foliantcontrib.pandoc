@@ -81,7 +81,7 @@ class Backend(BaseBackend):
 
         reference_docx = self._pandoc_config.get('reference_docx')
         if reference_docx:
-            components.append(f'--reference-docx={reference_docx}')
+            components.append(f'--reference-doc={reference_docx}')
 
         components.append(f'--output {self.get_slug()}.docx')
         components.append(self._get_filters_string())
