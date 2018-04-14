@@ -116,7 +116,7 @@ class Backend(BaseBackend):
         self._pandoc_config = self.config.get('backend_config', {}).get('pandoc', {})
 
     def make(self, target: str) -> str:
-        with spinner(f'Making {target} with Pandoc', self.quiet):
+        with spinner(f'Making {target} with Pandoc', self.logger, self.quiet):
             try:
                 if target == 'pdf':
                     command = self._get_pdf_command()
