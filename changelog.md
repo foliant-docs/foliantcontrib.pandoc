@@ -13,5 +13,6 @@
 
 # 1.0.4
 
+-   Add logs.
 -   Update for Foliant 1.0.4: Pass logger to spinner.
 -   Require Foliant 1.0.4.
