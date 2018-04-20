@@ -28,7 +28,11 @@ class Backend(BaseBackend):
             else:
                 result.append(f'--variable {var_name}="{var_value}"')
 
-        return ' '.join(result)
+        vars_string = ' '.join(result)
+
+        self.logger.debug(f'Vars string: {vars_string}')
+
+        return vars_string
 
     def _get_filters_string(self) -> str:
         result = []
@@ -38,7 +42,11 @@ class Backend(BaseBackend):
         for filter_ in filters:
             result.append(f'--filter {filter_}')
 
-        return ' '.join(result)
+        filters_string = ' '.join(result)
+
+        self.logger.debug(f'Filters string: {filters_string}')
+
+        return filters_string
 
     def _get_params_string(self) -> str:
         result = []
@@ -51,13 +59,21 @@ class Backend(BaseBackend):
             else:
                 result.append(f'--{param_name.replace("_", "-")}={param_value}')
 
-        return ' '.join(result)
+        params_string = ' '.join(result)
+
+        self.logger.debug(f'Params string: {params_string}')
+
+        return params_string
 
     def _get_from_string(self) -> str:
         markdown_flavor = self._pandoc_config.get('markdown_flavor', 'markdown')
         markdown_extensions = self._pandoc_config.get('markdown_extensions', ())
 
-        return '+'.join((markdown_flavor, *markdown_extensions))
+        from_string = '+'.join((markdown_flavor, *markdown_extensions))
+
+        self.logger.debug(f'From string: {from_string}')
+
+        return from_string
 
     def _get_pdf_command(self) -> str:
         components = [self._pandoc_config.get('pandoc_path', 'pandoc')]
@@ -74,7 +90,11 @@ class Backend(BaseBackend):
             f'-f {self._get_from_string()} {self._flat_src_file_path}'
         )
 
-        return ' '.join(components)
+        command = ' '.join(components)
+
+        self.logger.debug(f'PDF generation command: {command}')
+
+        return command
 
     def _get_docx_command(self) -> str:
         components = [self._pandoc_config.get('pandoc_path', 'pandoc')]
@@ -90,7 +110,11 @@ class Backend(BaseBackend):
             f'-f {self._get_from_string()} {self._flat_src_file_path}'
         )
 
-        return ' '.join(components)
+        command = ' '.join(components)
+
+        self.logger.debug(f'Docx generation command: {command}')
+
+        return command
 
     def _get_tex_command(self) -> str:
         components = [self._pandoc_config.get('pandoc_path', 'pandoc')]
@@ -107,7 +131,11 @@ class Backend(BaseBackend):
             f'-f {self._get_from_string()} {self._flat_src_file_path}'
         )
 
-        return ' '.join(components)
+        command = ' '.join(components)
+
+        self.logger.debug(f'TeX generation command: {command}')
+
+        return command
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -115,8 +143,12 @@ class Backend(BaseBackend):
         self._flat_src_file_path = self.working_dir / self._flat_src_file_name
         self._pandoc_config = self.config.get('backend_config', {}).get('pandoc', {})
 
+        self.logger = self.logger.getChild('pandoc')
+
+        self.logger.debug(f'Backend inited: {self.__dict__}')
+
     def make(self, target: str) -> str:
-        with spinner(f'Making {target} with Pandoc', self.quiet):
+        with spinner(f'Making {target} with Pandoc', self.logger, self.quiet):
             try:
                 if target == 'pdf':
                     command = self._get_pdf_command()
@@ -127,7 +159,10 @@ class Backend(BaseBackend):
                 else:
                     raise ValueError(f'Pandoc cannot make {target}')
 
+                self.logger.debug('Running the command.')
+
                 run(command, shell=True, check=True, stdout=PIPE, stderr=STDOUT)
+
                 return f'{self.get_slug()}.{target}'
 
             except CalledProcessError as exception:
