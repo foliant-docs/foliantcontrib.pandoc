@@ -106,7 +106,7 @@ backend_config:
 :   is a list of Markdown extensions applied to the Markdown source. See [Pandoc’s Markdown](http://pandoc.org/MANUAL.html#pandocs-markdown) in the Pandoc documentation.
 
 `slug`
-:    Result file name without suffix (e.g. `.pdf`). Overrides top-level config option `slug`.
+:    is the result file name without suffix (e.g. `.pdf`). Overrides top-level config option `slug`.
 
 Example config:
 
