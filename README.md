@@ -70,6 +70,7 @@ backend_config:
     markdown_flavor: markdown
     markdown_extensions:
       ...
+    slug: My_Awesome_Custom_Slug
 ```
 
 `pandoc_path`
@@ -103,6 +104,9 @@ backend_config:
 
 `markdown_extensions`
 :   is a list of Markdown extensions applied to the Markdown source. See [Pandoc’s Markdown](http://pandoc.org/MANUAL.html#pandocs-markdown) in the Pandoc documentation.
+
+`slug`
+:    Result file name without suffix (e.g. `.pdf`). Overrides top-level config option `slug`.
 
 Example config:
 
