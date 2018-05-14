@@ -82,7 +82,7 @@ class Backend(BaseBackend):
         if template:
             components.append(f'--template={template}')
 
-        components.append(f'--output {self.get_slug()}.pdf')
+        components.append(f'--output {self._slug}.pdf')
         components.append(self._get_vars_string())
         components.append(self._get_filters_string())
         components.append(self._get_params_string())
@@ -103,7 +103,7 @@ class Backend(BaseBackend):
         if reference_docx:
             components.append(f'--reference-doc={reference_docx}')
 
-        components.append(f'--output {self.get_slug()}.docx')
+        components.append(f'--output {self._slug}.docx')
         components.append(self._get_filters_string())
         components.append(self._get_params_string())
         components.append(
@@ -123,7 +123,7 @@ class Backend(BaseBackend):
         if template:
             components.append(f'--template={template}')
 
-        components.append(f'--output {self.get_slug()}.tex')
+        components.append(f'--output {self._slug}.tex')
         components.append(self._get_vars_string())
         components.append(self._get_filters_string())
         components.append(self._get_params_string())
@@ -142,6 +142,7 @@ class Backend(BaseBackend):
 
         self._flat_src_file_path = self.working_dir / self._flat_src_file_name
         self._pandoc_config = self.config.get('backend_config', {}).get('pandoc', {})
+        self._slug = f'{self._pandoc_config.get("slug", self.get_slug())}'
 
         self.logger = self.logger.getChild('pandoc')
 
@@ -163,7 +164,7 @@ class Backend(BaseBackend):
 
                 run(command, shell=True, check=True, stdout=PIPE, stderr=STDOUT)
 
-                return f'{self.get_slug()}.{target}'
+                return f'{self._slug}.{target}'
 
             except CalledProcessError as exception:
                 raise RuntimeError(f'Build failed: {exception.output.decode()}')
