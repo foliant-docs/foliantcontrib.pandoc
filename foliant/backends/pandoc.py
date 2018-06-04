@@ -11,7 +11,7 @@ class Backend(BaseBackend):
 
     targets = ('pdf', 'docx', 'tex')
 
-    required_preprocessors_before = {
+    required_preprocessors_after = {
         'flatten': {
             'flat_src_file_name': _flat_src_file_name
         }
