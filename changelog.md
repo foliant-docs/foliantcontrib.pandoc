@@ -1,15 +1,10 @@
-# 1.0.1
+# 1.0.6
 
--   Add `tex` target.
+-   Apply `flatten` after all preprocessors, not before them. This fixes incompatibility with foliantcontrib.includes 1.0.5.
 
-# 1.0.2
+# 1.0.5
 
--   Change default Markdown flavor from `markdown_strict` to `markdown`.
-
-# 1.0.3
-
--   Change Pandoc command line parameter `--reference-docx` to `--reference-doc`.
-
+-   Add `slug` config option.
 
 # 1.0.4
 
@@ -17,7 +12,14 @@
 -   Update for Foliant 1.0.4: Pass logger to spinner.
 -   Require Foliant 1.0.4.
 
+# 1.0.3
 
-# 1.0.5
+-   Change Pandoc command line parameter `--reference-docx` to `--reference-doc`.
 
-- Add `slug` config option.
+# 1.0.2
+
+-   Change default Markdown flavor from `markdown_strict` to `markdown`.
+
+# 1.0.1
+
+-   Add `tex` target.
