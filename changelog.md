@@ -1,3 +1,7 @@
+# 1.0.7 (under development)
+
+-   Provide compatibility with Foliant 1.0.7.
+
 # 1.0.6
 
 -   Apply `flatten` after all preprocessors, not before them. This fixes incompatibility with foliantcontrib.includes 1.0.5.

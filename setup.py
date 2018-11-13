@@ -24,7 +24,7 @@ setup(
     license='MIT',
     platforms='any',
     install_requires=[
-        'foliant>=1.0.5',
+        'foliant>=1.0.7',
         'foliantcontrib.flatten>=1.0.2'
     ],
     classifiers=[
