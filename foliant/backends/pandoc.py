@@ -149,7 +149,7 @@ class Backend(BaseBackend):
         self.logger.debug(f'Backend inited: {self.__dict__}')
 
     def make(self, target: str) -> str:
-        with spinner(f'Making {target} with Pandoc', self.logger, self.quiet):
+        with spinner(f'Making {target} with Pandoc', self.logger, self.debug):
             try:
                 if target == 'pdf':
                     command = self._get_pdf_command()
