@@ -146,9 +146,9 @@ If you use Cyrillic letters inside backticks in your document you can see an err
 ```bash
 Error producing PDF.
 ! Undefined control sequence.
-\\lst@arg ->git clone [SSH-к
+\lst@arg ->git clone [SSH-к
                            люч]
-l.627 ...through{\\lstinline!git clone [SSH-ключ]!}
+l.627 ...through{\lstinline!git clone [SSH-ключ]!}
 ```
 
 To fix it set `listings` parameter to `false`:
