@@ -138,3 +138,28 @@ backend_config:
 In order to use svg images in pdf, you need to have `rsvg-convert` executable in `PATH`.
 
 On macOS, `brew install librsvg` does the trick. On Ubuntu, `apt install librsvg2-bin`. On Windows, [download `rsvg-convert.7z`](http://opensourcepack.blogspot.ru/2012/06/rsvg-convert-svg-image-conversion-tool.html) (without fontconfig support), unpack `rsvg-convert.exe`, and put it anywhere in `PATH`. For example, you can put it in the same directory where you run `foliant make`.
+
+### LaTeX listings package does not work correctly with Cyrillic letters
+
+If you use Cyrillic letters inside backticks in your document you can see an error like this:
+
+```bash
+Error producing PDF.
+! Undefined control sequence.
+\\lst@arg ->git clone [SSH-к
+                           люч]
+l.627 ...through{\\lstinline!git clone [SSH-ключ]!}
+```
+
+To fix it set `listings` parameter to `false`:
+
+```yaml
+backend_config:
+  pandoc:
+    ...
+    params:
+      pdf_engine: xelatex
+      listings: false
+      number_sections: true
+    ...
+```
