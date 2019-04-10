@@ -1,3 +1,7 @@
+# 1.0.9
+
+-   Escape double quotation marks (`"`) and dollar signs (`$`) which may be used in PDF, docx, and TeX generation commands as parts of filenames, variable values, etc. Enclose filenames that may be used in commands into double quotes.
+
 # 1.0.8
 
 -   Provide compatibility with Foliant 1.0.8.
