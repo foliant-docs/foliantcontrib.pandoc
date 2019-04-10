@@ -17,6 +17,17 @@ class Backend(BaseBackend):
         }
     },
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._flat_src_file_path = self.working_dir / self._flat_src_file_name
+        self._pandoc_config = self.config.get('backend_config', {}).get('pandoc', {})
+        self._slug = f'{self._pandoc_config.get("slug", self.get_slug())}'
+
+        self.logger = self.logger.getChild('pandoc')
+
+        self.logger.debug(f'Backend inited: {self.__dict__}')
+
     def _get_vars_string(self) -> str:
         result = []
 
@@ -136,17 +147,6 @@ class Backend(BaseBackend):
         self.logger.debug(f'TeX generation command: {command}')
 
         return command
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._flat_src_file_path = self.working_dir / self._flat_src_file_name
-        self._pandoc_config = self.config.get('backend_config', {}).get('pandoc', {})
-        self._slug = f'{self._pandoc_config.get("slug", self.get_slug())}'
-
-        self.logger = self.logger.getChild('pandoc')
-
-        self.logger.debug(f'Backend inited: {self.__dict__}')
 
     def make(self, target: str) -> str:
         with spinner(f'Making {target} with Pandoc', self.logger, self.quiet, self.debug):
