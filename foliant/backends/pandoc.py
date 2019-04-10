@@ -17,6 +17,23 @@ class Backend(BaseBackend):
         }
     },
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._flat_src_file_path = self.working_dir / self._flat_src_file_name
+        self._pandoc_config = self.config.get('backend_config', {}).get('pandoc', {})
+        self._slug = f'{self._pandoc_config.get("slug", self.get_slug())}'
+        self._slug_for_commands = self._escape_control_characters(str(self._slug))
+
+        self.logger = self.logger.getChild('pandoc')
+
+        self.logger.debug(f'Backend inited: {self.__dict__}')
+
+    def _escape_control_characters(self, source_string: str) -> str:
+        escaped_string = source_string.replace('"', "\\\"").replace('$', "\\$")
+
+        return escaped_string
+
     def _get_vars_string(self) -> str:
         result = []
 
@@ -26,7 +43,7 @@ class Backend(BaseBackend):
             elif var_value is True:
                 result.append(f'--variable {var_name}')
             else:
-                result.append(f'--variable {var_name}="{var_value}"')
+                result.append(f'--variable {var_name}="{self._escape_control_characters(str(var_value))}"')
 
         vars_string = ' '.join(result)
 
@@ -79,10 +96,11 @@ class Backend(BaseBackend):
         components = [self._pandoc_config.get('pandoc_path', 'pandoc')]
 
         template = self._pandoc_config.get('template')
-        if template:
-            components.append(f'--template={template}')
 
-        components.append(f'--output {self._slug}.pdf')
+        if template:
+            components.append(f'--template="{self._escape_control_characters(str(template))}"')
+
+        components.append(f'--output "{self._slug_for_commands}.pdf"')
         components.append(self._get_vars_string())
         components.append(self._get_filters_string())
         components.append(self._get_params_string())
@@ -100,10 +118,11 @@ class Backend(BaseBackend):
         components = [self._pandoc_config.get('pandoc_path', 'pandoc')]
 
         reference_docx = self._pandoc_config.get('reference_docx')
-        if reference_docx:
-            components.append(f'--reference-doc={reference_docx}')
 
-        components.append(f'--output {self._slug}.docx')
+        if reference_docx:
+            components.append(f'--reference-doc="{self._escape_control_characters(str(reference_docx))}"')
+
+        components.append(f'--output "{self._slug_for_commands}.docx"')
         components.append(self._get_filters_string())
         components.append(self._get_params_string())
         components.append(
@@ -120,10 +139,11 @@ class Backend(BaseBackend):
         components = [self._pandoc_config.get('pandoc_path', 'pandoc')]
 
         template = self._pandoc_config.get('template')
-        if template:
-            components.append(f'--template={template}')
 
-        components.append(f'--output {self._slug}.tex')
+        if template:
+            components.append(f'--template="{self._escape_control_characters(str(template))}"')
+
+        components.append(f'--output "{self._slug_for_commands}.tex"')
         components.append(self._get_vars_string())
         components.append(self._get_filters_string())
         components.append(self._get_params_string())
@@ -136,17 +156,6 @@ class Backend(BaseBackend):
         self.logger.debug(f'TeX generation command: {command}')
 
         return command
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self._flat_src_file_path = self.working_dir / self._flat_src_file_name
-        self._pandoc_config = self.config.get('backend_config', {}).get('pandoc', {})
-        self._slug = f'{self._pandoc_config.get("slug", self.get_slug())}'
-
-        self.logger = self.logger.getChild('pandoc')
-
-        self.logger.debug(f'Backend inited: {self.__dict__}')
 
     def make(self, target: str) -> str:
         with spinner(f'Making {target} with Pandoc', self.logger, self.quiet, self.debug):
