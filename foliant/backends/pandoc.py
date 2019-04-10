@@ -30,7 +30,7 @@ class Backend(BaseBackend):
         self.logger.debug(f'Backend inited: {self.__dict__}')
 
     def _escape_control_characters(self, source_string: str) -> str:
-        escaped_string = source_string.replace('"', "\\\"").replace('$', "\\$")
+        escaped_string = source_string.replace('"', "\\\"").replace('$', "\\$").replace('`', "\\`")
 
         return escaped_string
 
