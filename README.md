@@ -1,4 +1,8 @@
+[![](https://img.shields.io/pypi/v/foliantcontrib.pandoc.svg)](https://pypi.org/project/foliantcontrib.pandoc/) [![](https://img.shields.io/github/v/tag/foliant-docs/foliantcontrib.pandoc.svg?label=GitHub)](https://github.com/foliant-docs/foliantcontrib.pandoc)
+
 # Pandoc Backend for Foliant
+
+![PDF built with Foliant](https://raw.githubusercontent.com/foliant-docs/foliantcontrib.pandoc/master/img/pandoc.png)
 
 [Pandoc](http://pandoc.org/) is a Swiss-army knife document converter. It converts almost any format to any other format: md to pdf, rst to html, adoc to docx, and so on and so on.
 
