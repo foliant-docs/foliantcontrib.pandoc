@@ -179,4 +179,4 @@ class Backend(BaseBackend):
                 raise RuntimeError(f'Build failed: {exception.output.decode()}')
 
             except Exception as exception:
-                raise type(exception)(f'Build failed: {exception}')
+                raise RuntimeError(f'Build failed: {exception}')
