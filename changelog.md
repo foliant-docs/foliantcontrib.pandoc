@@ -1,3 +1,7 @@
+# 1.0.11
+
+-   Do not re-raise an exception of the same type as raised, raise `RuntimeError` instead, it’s needed to avoid non-informative error messages.
+
 # 1.0.10
 
 -   Add backticks to the set of characters that should be escaped.
