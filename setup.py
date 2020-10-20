@@ -16,7 +16,7 @@ setup(
     description=SHORT_DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
-    version='1.0.11',
+    version='1.1.0',
     author='Konstantin Molchanov',
     author_email='moigagoo@live.com',
     url='https://github.com/foliant-docs/foliantcontrib.pandoc',
@@ -25,7 +25,8 @@ setup(
     platforms='any',
     install_requires=[
         'foliant>=1.0.8',
-        'foliantcontrib.flatten>=1.0.2'
+        'foliantcontrib.flatten>=1.0.2',
+        'foliantcontrib.meta>=1.3.2'
     ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
