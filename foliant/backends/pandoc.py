@@ -5,7 +5,6 @@ from datetime import date
 
 from foliant.utils import spinner
 from foliant.backends.base import BaseBackend
-# from foliant.preprocessors import flatten
 from foliant.meta.generate import load_meta
 
 
@@ -15,16 +14,10 @@ class Backend(BaseBackend):
     targets = ('pdf', 'docx', 'tex')
 
     defaults = {
-        # 'flatten': True,
         'build_whole_project': True
     }
 
     required_preprocessors_after = {}
-    # required_preprocessors_after = {
-    #     'flatten': {
-    #         'flat_src_file_name': _flat_src_file_name
-    #     }
-    # },
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -45,10 +38,6 @@ class Backend(BaseBackend):
                 }
             },
 
-        # self.chapters = Chapters(self.config['chapters'])
-
-        # self.current_chapter = None
-        # self._update_slug()
         self.cache_dir = Path('.pandoccache')
         shutil.rmtree(self.cache_dir, ignore_errors=True)
         self.cache_dir.mkdir()
@@ -58,10 +47,6 @@ class Backend(BaseBackend):
         self.logger.debug(f'Backend inited: {self.__dict__}')
 
     def get_slug_overall(self) -> str:
-        '''Generate a slug from the project title and version and the current date.
-        Spaces in title are replaced with underscores, then the version and the current date
-        are appended.
-        '''
         if 'slug' in self._pandoc_config:
             slug = self._pandoc_config['slug']
         elif 'slug' in self.config:
@@ -83,10 +68,6 @@ class Backend(BaseBackend):
         return slug, slug_for_commands
 
     def get_slug_for_section(self, section) -> str:
-        '''Generate a slug from the project title and version and the current date.
-        Spaces in title are replaced with underscores, then the version and the current date
-        are appended.
-        '''
         if 'slug' in self._pandoc_config:
             slug = self._pandoc_config['slug']
         else:
@@ -106,38 +87,6 @@ class Backend(BaseBackend):
 
         slug_for_commands = self._escape_control_characters(slug)
         return slug, slug_for_commands
-
-    # def get_slug(self) -> str:
-    #     '''Generate a slug from the project title and version and the current date.
-    #     Spaces in title are replaced with underscores, then the version and the current date
-    #     are appended.
-    #     '''
-    #     if self._pandoc_config['flatten']:
-    #         if 'slug' in self.config:
-    #             return self.config['slug']
-
-    #         components = []
-
-    #         components.append(self.config['title'].replace(' ', '_'))
-
-    #     else:
-    #         if not self.current_chapter:
-    #             return ''
-    #         components = []
-
-    #         components.append(self.current_chapter.main_section.title.replace(' ', '_'))
-
-    #     version = self.config.get('version')
-    #     if version:
-    #         components.append(str(version))
-
-    #     components.append(str(date.today()))
-
-    #     return '-'.join(components)
-
-    # def _update_slug(self):
-    #     self._slug = f'{self._pandoc_config.get("slug", self.get_slug())}'
-    #     self._slug_for_commands = self._escape_control_characters(str(self._slug))
 
     def _escape_control_characters(self, source_string: str) -> str:
         escaped_string = source_string.replace('"', "\\\"").replace('$', "\\$").replace('`', "\\`")
@@ -325,11 +274,9 @@ class Backend(BaseBackend):
     def _build_separate(self, target: str) -> str:
         result = []
         for section in self.meta.iter_sections():
-            # self.current_chapter = None
             local_pandoc_config = section.data.get('pandoc', {})
             if local_pandoc_config:
                 self.logger.debug(f'Found section with pandoc meta: {section.id}')
-                # self.current_chapter = chapter
                 if not isinstance(local_pandoc_config, dict):
                     local_pandoc_config = {}
                 self._pandoc_config = {**self._base_pandoc_config, **local_pandoc_config}
