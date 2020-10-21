@@ -23,33 +23,33 @@ Build pdf:
 
 ```shell
 $ foliant make pdf -p my-project
-✔ Parsing config
-✔ Applying preprocessor flatten
-✔ Making pdf with Pandoc
+Parsing config... Done
+Applying preprocessor flatten... Done
+Making pdf with Pandoc... Done
 ─────────────────────
-Result: My_Project-2017-12-04.pdf
+Result: My_Project-2020-12-04.pdf
 ```
 
 Build docx:
 
 ```shell
 $ foliant make docx -p my-project
-✔ Parsing config
-✔ Applying preprocessor flatten
-✔ Making docx with Pandoc
+Parsing config... Done
+Applying preprocessor flatten... Done
+Making docx with Pandoc... Done
 ─────────────────────
-Result: My_Project-2017-12-04.docx
+Result: My_Project-2020-12-04.docx
 ```
 
 Build tex (mostly for pdf debugging):
 
 ```shell
 $ foliant make tex -p my-project
-✔ Parsing config
-✔ Applying preprocessor flatten
-✔ Making docx with Pandoc
+Parsing config... Done
+Applying preprocessor flatten... Done
+Making docx with Pandoc... Done
 ─────────────────────
-Result: My_Project-2017-12-04.tex
+Result: My_Project-2020-12-04.tex
 ```
 
 
@@ -63,6 +63,7 @@ You can however customize the backend with options in `backend_config.pandoc` se
 backend_config:
   pandoc:
     pandoc_path: pandoc
+    build_whole_project: true
     template: !path template.tex
     vars:
       ...
@@ -79,6 +80,9 @@ backend_config:
 
 `pandoc_path`
 :   is the path to `pandoc` executable. By default, it's assumed to be in the `PATH`.
+
+`build_whole_project`
+:   *added in 1.1.0* If `true`, whole project will be built into a single flat document. Default: `true`.
 
 `template`
 :   is the path to the TeX template to use when building pdf and tex (see [“Templates”](http://pandoc.org/MANUAL.html#templates) in the Pandoc documentation).
@@ -123,7 +127,7 @@ backend_config:
       title: This Is a Title
       second_title: This Is a Subtitle
       logo: !path templates/logo.png
-      year: 2017
+      year: 2020
     params:
       pdf_engine: xelatex
       listings: true
@@ -134,6 +138,93 @@ backend_config:
       - strikeout
 ```
 
+## Build modes
+
+Since 1.1.0 you can build parts of your project into separate PDFs, along with the main PDF of the whole project.
+
+If the `build_whole_project` parameter of Pandoc backend config is `true`, the whole project will be built in to a flat document as usual. You can disable it by switching `build_whole_project` to false.
+
+You can also build parts of your project into separate documents. To configure such behavior we will be adding [Metadata](https://foliant-docs.github.io/docs/meta/) to chapters or even smaller sections.
+
+To build a chapter into a separate document, add the following `meta` tag to your chapter's source:
+
+```
+<meta
+  pandoc="
+    vars:
+      toc: true
+      title: Our Awesome Product
+      second_title: Specifications
+      logo: !path templates/logo.png
+      year: 2020
+  "></meta>
+
+# Specifications
+
+size: 15
+weight: 59
+lifespan: 9
+```
+
+In the example above we have added a `meta` tag with `pandoc` field, in which we have overriden the `vars` mapping. The `pandoc` field is essential in this case. This is how backend determines that we want this chapter built separately. If you don't want to override any parameters, you can just add `pandoc="true"` field.
+
+**All parameters which are not overriden in the meta tag will be taken from main config `foliant.yml`**.
+
+Now, as the `pandoc` field is present in one of the meta tags in the project, Pandoc backend should build not one but two documents. Let's check if it's true:
+
+```shell
+$ foliant make pdf
+Parsing config... Done
+Applying preprocessor flatten... Done
+Making pdf with Pandoc... Done
+─────────────────────
+Result:
+My_Project-2020-12-04.pdf
+Specifications-2020-12-04.pdf
+```
+
+That's right, we've got the main PDF with whole project and another pdf, with just the Specifications chapter.
+
+If you wish to build even smaller piece of the project into separate file, add meta tag under the heading which you want to build:
+
+```
+# Specifications
+
+size: 15
+weight: 59
+lifespan: 9
+
+## Additional info
+
+<meta
+  pandoc="
+    slug: additional
+    vars:
+      toc: true
+      title: Our Awesome Product
+      second_title: Additional info
+      logo: !path templates/logo.png
+      year: 2020
+  "></meta>
+
+Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti quos provident dolores eligendi nam quia sequi et tempore enim blanditiis, consequatur nostrum nulla dolor laborum quasi molestiae perspiciatis magni error consectetur nesciunt eaque veritatis voluptates! Cupiditate illum enim id recusandae assumenda excepturi odit tempore incidunt, amet soluta necessitatibus corrupti, aliquam.
+
+```
+
+In this example only the Additional info section will be built into a separate document. Notice that we've also given it its own slug.
+
+Let's build again and look at the results:
+
+```shell
+$ foliant make pdf
+Parsing config... Done
+Applying preprocessor flatten... Done
+Making pdf with Pandoc... Done
+─────────────────────
+Result:
+My_Project-2020-12-04.pdf
+additional.pdf
+```
 
 ## Troubleshooting
 
