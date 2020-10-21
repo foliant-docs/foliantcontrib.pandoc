@@ -1,3 +1,7 @@
+# 1.1.0
+
+-   Option to build separate chapters (sections) into separate files.
+
 # 1.0.11
 
 -   Do not re-raise an exception of the same type as raised, raise `RuntimeError` instead, it’s needed to avoid non-informative error messages.

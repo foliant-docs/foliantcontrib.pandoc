@@ -1,9 +1,11 @@
+import shutil
 from subprocess import run, PIPE, STDOUT, CalledProcessError
-from pathlib import Path
+from pathlib import Path, PosixPath
+from datetime import date
 
 from foliant.utils import spinner
 from foliant.backends.base import BaseBackend
-from foliant.preprocessors import flatten
+from foliant.meta.generate import load_meta
 
 
 class Backend(BaseBackend):
@@ -11,23 +13,80 @@ class Backend(BaseBackend):
 
     targets = ('pdf', 'docx', 'tex')
 
-    required_preprocessors_after = {
-        'flatten': {
-            'flat_src_file_name': _flat_src_file_name
-        }
-    },
+    defaults = {
+        'build_whole_project': True
+    }
+
+    required_preprocessors_after = {}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self._flat_src_file_path = self.working_dir / self._flat_src_file_name
-        self._pandoc_config = self.config.get('backend_config', {}).get('pandoc', {})
-        self._slug = f'{self._pandoc_config.get("slug", self.get_slug())}'
-        self._slug_for_commands = self._escape_control_characters(str(self._slug))
+        self._base_pandoc_config = self._pandoc_config = {
+            **self.defaults,
+            **self.config.get(
+                'backend_config',
+                {}
+            ).get('pandoc', {})
+        }
+        if self._pandoc_config['build_whole_project']:
+            self.required_preprocessors_after = {
+                'flatten': {
+                    'flat_src_file_name': self._flat_src_file_name,
+                    'keep_sources': True
+                }
+            },
+
+        self.cache_dir = Path('.pandoccache')
+        shutil.rmtree(self.cache_dir, ignore_errors=True)
+        self.cache_dir.mkdir()
 
         self.logger = self.logger.getChild('pandoc')
 
         self.logger.debug(f'Backend inited: {self.__dict__}')
+
+    def get_slug_overall(self) -> str:
+        if 'slug' in self._pandoc_config:
+            slug = self._pandoc_config['slug']
+        elif 'slug' in self.config:
+            slug = self.config['slug']
+        else:
+            components = []
+
+            components.append(self.config['title'].replace(' ', '_'))
+
+            version = self.config.get('version')
+            if version:
+                components.append(str(version))
+
+            components.append(str(date.today()))
+
+            slug = '-'.join(components)
+
+        slug_for_commands = self._escape_control_characters(slug)
+        return slug, slug_for_commands
+
+    def get_slug_for_section(self, section) -> str:
+        if 'slug' in self._pandoc_config:
+            slug = self._pandoc_config['slug']
+        else:
+            components = []
+
+            components.append(section.title.replace(' ', '_'))
+
+            version = section.data.get('version')\
+                or section.data.get('vars', {}).get('version')\
+                or self.config.get('version')
+            if version:
+                components.append(str(version))
+
+            components.append(str(date.today()))
+
+            slug = '-'.join(components)
+
+        slug_for_commands = self._escape_control_characters(slug)
+        return slug, slug_for_commands
 
     def _escape_control_characters(self, source_string: str) -> str:
         escaped_string = source_string.replace('"', "\\\"").replace('$', "\\$").replace('`', "\\`")
@@ -92,7 +151,11 @@ class Backend(BaseBackend):
 
         return from_string
 
-    def _get_pdf_command(self) -> str:
+    def _get_pdf_command(
+        self,
+        source_path: str or PosixPath,
+        slug: str
+    ) -> str:
         components = [self._pandoc_config.get('pandoc_path', 'pandoc')]
 
         template = self._pandoc_config.get('template')
@@ -100,12 +163,12 @@ class Backend(BaseBackend):
         if template:
             components.append(f'--template="{self._escape_control_characters(str(template))}"')
 
-        components.append(f'--output "{self._slug_for_commands}.pdf"')
+        components.append(f'--output "{slug}.pdf"')
         components.append(self._get_vars_string())
         components.append(self._get_filters_string())
         components.append(self._get_params_string())
         components.append(
-            f'-f {self._get_from_string()} {self._flat_src_file_path}'
+            f'-f {self._get_from_string()} {source_path}'
         )
 
         command = ' '.join(components)
@@ -114,7 +177,11 @@ class Backend(BaseBackend):
 
         return command
 
-    def _get_docx_command(self) -> str:
+    def _get_docx_command(
+        self,
+        source_path: str or PosixPath,
+        slug: str
+    ) -> str:
         components = [self._pandoc_config.get('pandoc_path', 'pandoc')]
 
         reference_docx = self._pandoc_config.get('reference_docx')
@@ -122,11 +189,11 @@ class Backend(BaseBackend):
         if reference_docx:
             components.append(f'--reference-doc="{self._escape_control_characters(str(reference_docx))}"')
 
-        components.append(f'--output "{self._slug_for_commands}.docx"')
+        components.append(f'--output "{slug}.docx"')
         components.append(self._get_filters_string())
         components.append(self._get_params_string())
         components.append(
-            f'-f {self._get_from_string()} {self._flat_src_file_path}'
+            f'-f {self._get_from_string()} {source_path}'
         )
 
         command = ' '.join(components)
@@ -135,7 +202,11 @@ class Backend(BaseBackend):
 
         return command
 
-    def _get_tex_command(self) -> str:
+    def _get_tex_command(
+        self,
+        source_path: str or PosixPath,
+        slug: str
+    ) -> str:
         components = [self._pandoc_config.get('pandoc_path', 'pandoc')]
 
         template = self._pandoc_config.get('template')
@@ -143,12 +214,12 @@ class Backend(BaseBackend):
         if template:
             components.append(f'--template="{self._escape_control_characters(str(template))}"')
 
-        components.append(f'--output "{self._slug_for_commands}.tex"')
+        components.append(f'--output "{slug}.tex"')
         components.append(self._get_vars_string())
         components.append(self._get_filters_string())
         components.append(self._get_params_string())
         components.append(
-            f'-f {self._get_from_string()} {self._flat_src_file_path}'
+            f'-f {self._get_from_string()} {source_path}'
         )
 
         command = ' '.join(components)
@@ -157,26 +228,102 @@ class Backend(BaseBackend):
 
         return command
 
-    def make(self, target: str) -> str:
-        with spinner(f'Making {target} with Pandoc', self.logger, self.quiet, self.debug):
-            try:
-                if target == 'pdf':
-                    command = self._get_pdf_command()
-                elif target == 'docx':
-                    command = self._get_docx_command()
-                elif target == 'tex':
-                    command = self._get_tex_command()
+    def _build_flat(self, target: str) -> str:
+        slug, slug_for_commands = self.get_slug_overall()
+        try:
+            if target == 'pdf':
+                command = self._get_pdf_command(
+                    self._flat_src_file_path,
+                    slug_for_commands
+                )
+            elif target == 'docx':
+                command = self._get_docx_command(
+                    self._flat_src_file_path,
+                    slug_for_commands
+                )
+            elif target == 'tex':
+                command = self._get_tex_command(
+                    self._flat_src_file_path,
+                    slug_for_commands
+                )
+            else:
+                raise ValueError(f'Pandoc cannot make {target}')
+
+            self.logger.debug('Running the command.')
+
+            run(command, shell=True, check=True, stdout=PIPE, stderr=STDOUT)
+
+            return f'{slug}.{target}'
+
+        except CalledProcessError as exception:
+            raise RuntimeError(f'Build failed: {exception.output.decode()}')
+
+        except Exception as exception:
+            raise RuntimeError(f'Build failed: {exception}')
+
+    def _serialize_section(self, section, slug: str) -> str:
+        filename = self.cache_dir / f'{slug}.md'
+        counter = 1
+        while filename.exists():
+            counter += 1
+            filename = filename.parent / f'{slug}{counter}.md'
+        with open(filename, 'w') as f:
+            f.write(section.get_source())
+        return str(filename)
+
+    def _build_separate(self, target: str) -> str:
+        result = []
+        for section in self.meta.iter_sections():
+            local_pandoc_config = section.data.get('pandoc', {})
+            if local_pandoc_config:
+                self.logger.debug(f'Found section with pandoc meta: {section.id}')
+                if not isinstance(local_pandoc_config, dict):
+                    local_pandoc_config = {}
+                self._pandoc_config = {**self._base_pandoc_config, **local_pandoc_config}
+                slug, slug_for_commands = self.get_slug_for_section(section)
+                if section.is_main():
+                    filename = section.chapter.filename
                 else:
-                    raise ValueError(f'Pandoc cannot make {target}')
+                    filename = self._serialize_section(section, slug)
+                try:
+                    if target == 'pdf':
+                        command = self._get_pdf_command(
+                            filename,
+                            slug_for_commands
+                        )
+                    elif target == 'docx':
+                        command = self._get_docx_command(
+                            filename,
+                            slug_for_commands
+                        )
+                    elif target == 'tex':
+                        command = self._get_tex_command(
+                            filename,
+                            slug_for_commands
+                        )
+                    else:
+                        raise ValueError(f'Pandoc cannot make {target}')
 
-                self.logger.debug('Running the command.')
+                    self.logger.debug('Running the command.')
 
-                run(command, shell=True, check=True, stdout=PIPE, stderr=STDOUT)
+                    run(command, shell=True, check=True, stdout=PIPE, stderr=STDOUT)
 
-                return f'{self._slug}.{target}'
+                    result.append(f'{slug}.{target}')
 
-            except CalledProcessError as exception:
-                raise RuntimeError(f'Build failed: {exception.output.decode()}')
+                except CalledProcessError as exception:
+                    raise RuntimeError(f'Build failed: {exception.output.decode()}')
 
-            except Exception as exception:
-                raise RuntimeError(f'Build failed: {exception}')
+                except Exception as exception:
+                    raise RuntimeError(f'Build failed: {exception}')
+            else:
+                continue
+        return result
+
+    def make(self, target: str) -> str:
+        self.meta = load_meta(self.config.get('chapters', []), self.working_dir)
+        with spinner(f'Making {target} with Pandoc', self.logger, self.quiet, self.debug):
+            result = []
+            if self._pandoc_config['build_whole_project']:
+                result.append(self._build_flat(target))
+            result.extend(self._build_separate(target))
+            return '\n' + '\n'.join(result)
