@@ -26,7 +26,7 @@ setup(
     install_requires=[
         'foliant>=1.0.8',
         'foliantcontrib.flatten>=1.0.2',
-        'foliantcontrib.meta>=1.3.2'
+        'foliantcontrib.meta>=1.3.2',
     ],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
