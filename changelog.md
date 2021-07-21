@@ -1,3 +1,8 @@
+# 1.1.1
+
+-   Passing metadata parameters via config.
+-   Fix: images didn't render during separate sections build.
+
 # 1.1.0
 
 -   Option to build separate chapters (sections) into separate files.

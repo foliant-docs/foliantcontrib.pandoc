@@ -67,6 +67,8 @@ backend_config:
     template: !path template.tex
     vars:
       ...
+    meta:
+      ...
     reference_docx: !path reference.docx
     params:
       ...
@@ -92,7 +94,10 @@ backend_config:
     > Use `!path` tag to ensure the value is converted into a valid path relative to the project directory.
 
 `vars`
-:   is a mapping of template variables and their values.
+:   is a mapping of template variables and their values. They will be added to pandoc command as `--variable key[=val]`.
+
+`meta`
+:   is a mapping of document metadata properties and their values. They will be added to pandoc command as `--metadata key[=val]`.
 
 `reference_docx`
 :   is the path to the reference document to used when building docx (see [“Templates”](http://pandoc.org/MANUAL.html#templates) in the Pandoc documentation).

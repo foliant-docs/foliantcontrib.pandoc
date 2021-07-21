@@ -1,11 +1,33 @@
+import os
 import shutil
-from subprocess import run, PIPE, STDOUT, CalledProcessError
-from pathlib import Path, PosixPath
-from datetime import date
 
-from foliant.utils import spinner
+from contextlib import contextmanager
+from datetime import date
+from pathlib import Path
+from pathlib import PosixPath
+from subprocess import CalledProcessError
+from subprocess import PIPE
+from subprocess import STDOUT
+from subprocess import run
+from typing import Union
+
 from foliant.backends.base import BaseBackend
 from foliant.meta.generate import load_meta
+from foliant.utils import spinner
+
+
+@contextmanager
+def chcwd(newcwd: Union[str, Path], *args, **kwargs):
+    '''
+    Temporary change working directory to `newcwd`
+    '''
+
+    init_cwd = os.getcwd()
+    try:
+        os.chdir(newcwd)
+        yield
+    finally:
+        os.chdir(init_cwd)
 
 
 class Backend(BaseBackend):
@@ -110,6 +132,23 @@ class Backend(BaseBackend):
 
         return vars_string
 
+    def _get_metadata_string(self) -> str:
+        result = []
+
+        for meta_name, meta_value in self._pandoc_config.get('meta', {}).items():
+            if meta_value is False:
+                continue
+            elif meta_value is True:
+                result.append(f'--metadata {meta_name}')
+            else:
+                result.append(f'--metadata {meta_name}="{self._escape_control_characters(str(meta_value))}"')
+
+        vars_string = ' '.join(result)
+
+        self.logger.debug(f'Metadata string: {vars_string}')
+
+        return vars_string
+
     def _get_filters_string(self) -> str:
         result = []
 
@@ -165,6 +204,7 @@ class Backend(BaseBackend):
 
         components.append(f'--output "{slug}.pdf"')
         components.append(self._get_vars_string())
+        components.append(self._get_metadata_string())
         components.append(self._get_filters_string())
         components.append(self._get_params_string())
         components.append(
@@ -190,6 +230,7 @@ class Backend(BaseBackend):
             components.append(f'--reference-doc="{self._escape_control_characters(str(reference_docx))}"')
 
         components.append(f'--output "{slug}.docx"')
+        components.append(self._get_metadata_string())
         components.append(self._get_filters_string())
         components.append(self._get_params_string())
         components.append(
@@ -216,6 +257,7 @@ class Backend(BaseBackend):
 
         components.append(f'--output "{slug}.tex"')
         components.append(self._get_vars_string())
+        components.append(self._get_metadata_string())
         components.append(self._get_filters_string())
         components.append(self._get_params_string())
         components.append(
@@ -261,15 +303,20 @@ class Backend(BaseBackend):
         except Exception as exception:
             raise RuntimeError(f'Build failed: {exception}')
 
-    def _serialize_section(self, section, slug: str) -> str:
-        filename = self.cache_dir / f'{slug}.md'
+    def _serialize_section(self, section, slug: str) -> Path:
+        """
+        Save section content into a "_md" file (to avoid name clashes) into the
+        same dir as the section's chapter (for paths to images to work).
+        """
+        filename = Path(section.chapter.filename).parent / f'{slug}._md'
         counter = 1
         while filename.exists():
             counter += 1
             filename = filename.parent / f'{slug}{counter}.md'
+        self.logger.debug(f'Serializing section {section} into {filename}')
         with open(filename, 'w') as f:
             f.write(section.get_source())
-        return str(filename)
+        return filename
 
     def _build_separate(self, target: str) -> str:
         result = []
@@ -281,10 +328,18 @@ class Backend(BaseBackend):
                     local_pandoc_config = {}
                 self._pandoc_config = {**self._base_pandoc_config, **local_pandoc_config}
                 slug, slug_for_commands = self.get_slug_for_section(section)
+                slug_for_commands = os.path.join(os.getcwd(), slug_for_commands)
+                self.logger.debug(f'Generated absolute slug: {slug_for_commands}')
+
                 if section.is_main():
-                    filename = section.chapter.filename
+                    source_dir, filename = os.path.split(
+                        section.chapter.filename
+                    )
                 else:
-                    filename = self._serialize_section(section, slug)
+                    source_dir, filename = os.path.split(
+                        self._serialize_section(section, slug)
+                    )
+                self.logger.debug(f'Section to build: {source_dir=}, {filename=}')
                 try:
                     if target == 'pdf':
                         command = self._get_pdf_command(
@@ -305,8 +360,8 @@ class Backend(BaseBackend):
                         raise ValueError(f'Pandoc cannot make {target}')
 
                     self.logger.debug('Running the command.')
-
-                    run(command, shell=True, check=True, stdout=PIPE, stderr=STDOUT)
+                    with chcwd(source_dir):
+                        run(command, shell=True, check=True, stdout=PIPE, stderr=STDOUT)
 
                     result.append(f'{slug}.{target}')
 
