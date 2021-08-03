@@ -160,7 +160,7 @@ To build a chapter into a separate document, add the following `meta` tag to you
       toc: true
       title: Our Awesome Product
       second_title: Specifications
-      logo: !path templates/logo.png
+      logo: templates/logo.png
       year: 2020
   "></meta>
 
@@ -208,7 +208,7 @@ lifespan: 9
       toc: true
       title: Our Awesome Product
       second_title: Additional info
-      logo: !path templates/logo.png
+      logo: templates/logo.png
       year: 2020
   "></meta>
 
