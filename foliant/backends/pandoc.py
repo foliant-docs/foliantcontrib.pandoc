@@ -33,7 +33,7 @@ def chcwd(newcwd: Union[str, Path], *args, **kwargs):
 class Backend(BaseBackend):
     _flat_src_file_name = '__all__.md'
 
-    targets = ('pdf', 'docx', 'tex')
+    targets = ('pdf', 'docx', 'tex', 'odt', 'epub')
 
     defaults = {
         'build_whole_project': True
@@ -239,7 +239,59 @@ class Backend(BaseBackend):
 
         command = ' '.join(components)
 
-        self.logger.debug(f'Docx generation command: {command}')
+        self.logger.debug(f'DOCX generation command: {command}')
+
+        return command
+
+    def _get_odt_command(
+        self,
+        source_path: str or PosixPath,
+        slug: str
+    ) -> str:
+        components = [self._pandoc_config.get('pandoc_path', 'pandoc')]
+
+        reference_odt = self._pandoc_config.get('reference_odt')
+
+        if reference_odt:
+            components.append(f'--reference-doc="{self._escape_control_characters(str(reference_odt))}"')
+
+        components.append(f'--output "{slug}.odt"')
+        components.append(self._get_metadata_string())
+        components.append(self._get_filters_string())
+        components.append(self._get_params_string())
+        components.append(
+            f'-f {self._get_from_string()} {source_path}'
+        )
+
+        command = ' '.join(components)
+
+        self.logger.debug(f'ODT generation command: {command}')
+
+        return command
+
+    def _get_epub_command(
+        self,
+        source_path: str or PosixPath,
+        slug: str
+    ) -> str:
+        components = [self._pandoc_config.get('pandoc_path', 'pandoc')]
+
+        css_file = self._pandoc_config.get('css')
+
+        if css_file:
+            components.append(f'--css="{self._escape_control_characters(str(css_file))}"')
+
+        components.append(f'--output "{slug}.epub"')
+        components.append(self._get_metadata_string())
+        components.append(self._get_filters_string())
+        components.append(self._get_params_string())
+        components.append(
+            f'-f {self._get_from_string()} {source_path}'
+        )
+
+        command = ' '.join(components)
+
+        self.logger.debug(f'EPUB generation command: {command}')
 
         return command
 
@@ -285,6 +337,16 @@ class Backend(BaseBackend):
                 )
             elif target == 'tex':
                 command = self._get_tex_command(
+                    self._flat_src_file_path,
+                    slug_for_commands
+                )
+            elif target == 'odt':
+                command = self._get_odt_command(
+                    self._flat_src_file_path,
+                    slug_for_commands
+                )
+            elif target == 'epub':
+                command = self._get_epub_command(
                     self._flat_src_file_path,
                     slug_for_commands
                 )

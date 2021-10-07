@@ -1,3 +1,7 @@
+# 1.1.2
+
+-   Add `odt` and `epub` targets basic support.
+
 # 1.1.1
 
 -   Passing metadata parameters via config.

@@ -6,7 +6,7 @@
 
 [Pandoc](http://pandoc.org/) is a Swiss-army knife document converter. It converts almost any format to any other format: md to pdf, rst to html, adoc to docx, and so on and so on.
 
-Pandoc backend for Foliant add `pdf`, `docx`, and `tex` targets.
+Pandoc backend for Foliant adds `pdf`, `docx`, `odt`, `epub` and `tex` targets.
 
 
 ## Installation
@@ -41,6 +41,28 @@ Making docx with Pandoc... Done
 Result: My_Project-2020-12-04.docx
 ```
 
+Build odt:
+
+```shell
+$ foliant make odt -p my-project
+Parsing config... Done
+Applying preprocessor flatten... Done
+Making odt with Pandoc... Done
+─────────────────────
+Result: My_Project-2020-12-04.odt
+```
+
+Build docx:
+
+```shell
+$ foliant make epub -p my-project
+Parsing config... Done
+Applying preprocessor flatten... Done
+Making epub with Pandoc... Done
+─────────────────────
+Result: My_Project-2020-12-04.epub
+```
+
 Build tex (mostly for pdf debugging):
 
 ```shell
@@ -70,6 +92,8 @@ backend_config:
     meta:
       ...
     reference_docx: !path reference.docx
+    reference_odt: !path reference.odt
+    css: !path epub.css
     params:
       ...
     filters:
@@ -100,11 +124,13 @@ backend_config:
 :   is a mapping of document metadata properties and their values. They will be added to pandoc command as `--metadata key[=val]`.
 
 `reference_docx`
-:   is the path to the reference document to used when building docx (see [“Templates”](http://pandoc.org/MANUAL.html#templates) in the Pandoc documentation).
+:   is the path to the reference document to be used when building docx (see **--reference-doc** option info in the Pandoc  [Options](https://pandoc.org/MANUAL#options-affecting-specific-writers) documentation).
 
-    > **Tip**
-    >
-    > Use `!path` tag to ensure the value is converted into a valid path relative to the project directory.
+`reference_odt`
+:   is the path to the reference document to be used when building odt (see **--reference-doc** option info in the Pandoc  [Options](https://pandoc.org/MANUAL#options-affecting-specific-writers) documentation).
+
+`css`
+:   is the path to the stylesheets to be used when building epub (see **--css** option info in the Pandoc  [Options](https://pandoc.org/MANUAL#options-affecting-specific-writers) documentation).
 
 `params`
 :   are passed to the `pandoc` command. Params should be defined by their long names, with dashes replaced with underscores (e.g. `--pdf-engine` is defined as `pdf_engine`).
