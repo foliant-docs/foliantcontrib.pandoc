@@ -52,7 +52,7 @@ Making odt with Pandoc... Done
 Result: My_Project-2020-12-04.odt
 ```
 
-Build docx:
+Build epub:
 
 ```shell
 $ foliant make epub -p my-project
